@@ -1,5 +1,5 @@
 
-name: Smart CI - Cache Invalidation
+name: Smart CI - Cache and Dynamic Test Routing
 
 on:
   push:
@@ -14,8 +14,10 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-      - name: Set up Python with pip cache
+      - name: Set up Python with cache
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
@@ -27,5 +29,23 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Run tests
+      - name: Detect changed files
+        id: changes
+        env:
+          BASE_SHA: ${{ github.event.before || github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.sha }}
+        run: python scripts/select_tests.py
+
+      - name: Run complete test suite
+        if: steps.changes.outputs.run_all == 'true'
         run: python -m pytest -v
+
+      - name: Run selected tests
+        if: steps.changes.outputs.run_all != 'true' && steps.changes.outputs.has_tests == 'true'
+        env:
+          SELECTED_TESTS: ${{ steps.changes.outputs.tests }}
+        run: python -m pytest -v $SELECTED_TESTS
+
+      - name: No relevant changes
+        if: steps.changes.outputs.run_all != 'true' && steps.changes.outputs.has_tests != 'true'
+        run: echo "No relevant changes. Skipping tests."
