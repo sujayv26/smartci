@@ -8,3 +8,4 @@ def apply_discount(price, percent):
 def add_tax(price, rate=0.18):
     return round(price * (1 + rate), 2)
 # Testing GitHub Actions pip cache reuse
+# Updated for A4_3 dynamic test routing
