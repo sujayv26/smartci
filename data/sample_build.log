@@ -1,0 +1,5 @@
+[INFO] Starting CI build #1842
+[WARNING] Package legacy-utils is deprecated
+[ERROR] tests/test_payment.py::test_payment_total - AssertionError: expected 118.00 but received 108.00
+[INFO] 1 failed, 42 passed
+[ERROR] Build failed with exit code 1
